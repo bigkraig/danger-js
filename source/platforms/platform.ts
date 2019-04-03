@@ -1,5 +1,5 @@
-import { Env, CISource } from "../ci_source/ci_source"
-import { GitJSONDSL, GitDSL } from "../dsl/GitDSL"
+import { CISource, Env } from "../ci_source/ci_source"
+import { GitDSL, GitJSONDSL } from "../dsl/GitDSL"
 import { GitHub } from "./GitHub"
 import { GitHubAPI } from "./github/GitHubAPI"
 import { BitBucketServer } from "./BitBucketServer"
@@ -9,6 +9,8 @@ import { ExecutorOptions } from "../runner/Executor"
 import { DangerRunner } from "../runner/runners/runner"
 import chalk from "chalk"
 import { FakePlatform } from "./FakePlatform"
+import { GitLabAPI, gitlabSettingsFromEnv } from "./gitlab/GitLabAPI"
+import { GitLab } from "./GitLab"
 
 /** A type that represents the downloaded metadata about a code review session */
 export type Metadata = any
@@ -100,6 +102,13 @@ export function getPlatformForEnv(env: Env, source: CISource, requireAuth = true
     )
     const bbs = new BitBucketServer(api)
     return bbs
+  }
+
+  const gitlabToken = env["DANGER_GITLAB_TOKEN"]
+  if (gitlabToken) {
+    const api = new GitLabAPI(source, gitlabSettingsFromEnv(env))
+    const gitlab = new GitLab(api)
+    return gitlab
   }
 
   // They need to set the token up for GitHub actions to work

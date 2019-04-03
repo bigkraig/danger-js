@@ -45,7 +45,7 @@ export class GitHubAPI {
     // A token should have been set by this point
     const token = accessTokenForApp || this.token!
 
-    const host = process.env["DANGER_GITHUB_API_BASE_URL"] || process.env["GITHUB_URL"] || undefined
+    const host = process.env["DANGER_GITLAB_API_BASE_URL"] || process.env["GITLAB_URL"] || undefined
     const options: GitHubNodeAPI.Options & { debug: boolean } = {
       debug: !!process.env.LOG_FETCH_REQUESTS,
       baseUrl: host,

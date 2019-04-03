@@ -5,6 +5,7 @@ import { GitHubDSL } from "../dsl/GitHubDSL"
 import { BitBucketServerDSL, BitBucketServerJSONDSL } from "../dsl/BitBucketServerDSL"
 import { DangerUtilsDSL } from "./DangerUtilsDSL"
 import { CliArgs } from "../dsl/cli-args"
+import { GitLabDSL } from "./GitLabDSL"
 
 /**
  * The shape of the JSON passed between Danger and a subprocess. It's built
@@ -55,6 +56,8 @@ export interface DangerDSLJSONType {
   git: GitJSONDSL
   /** The data only version of GitHub DSL */
   github?: GitHubDSL
+  /** the data only version of GitLab DSL */
+  gitlab?: GitLabDSL
   /** The data only version of BitBucket Server DSL */
   bitbucket_server?: BitBucketServerJSONDSL
   /**
@@ -125,6 +128,8 @@ export interface DangerDSLType {
    */
   readonly bitbucket_server: BitBucketServerDSL
 
+  readonly gitlab: GitLabDSL
+
   /**
    * Functions which are globally useful in most Dangerfiles. Right
    * now, these functions are around making sentences of arrays, or
@@ -138,6 +143,7 @@ export interface DangerDSLType {
 export class DangerDSL {
   public readonly github?: GitHubDSL
   public readonly bitbucket_server?: BitBucketServerDSL
+  public readonly gitlab?: GitLabDSL
 
   constructor(platformDSL: any, public readonly git: GitJSONDSL, public readonly utils: DangerUtilsDSL, name: string) {
     switch (name) {
@@ -146,6 +152,8 @@ export class DangerDSL {
         this.github = platformDSL
       case "BitBucketServer":
         this.bitbucket_server = platformDSL
+      case "GitLab":
+        this.gitlab = platformDSL
     }
   }
 }

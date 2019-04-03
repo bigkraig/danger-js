@@ -7,6 +7,7 @@ import { sentence, href } from "./DangerUtils"
 import { LocalGit } from "../platforms/LocalGit"
 import { GitDSL } from "../dsl/GitDSL"
 import { bitBucketServerGitDSL } from "../platforms/bitbucket_server/BitBucketServerGit"
+import { GitLabAPI, gitlabSettingsFromEnv } from "../platforms/gitlab/GitLabAPI"
 import {
   BitBucketServerAPI,
   bitbucketServerRepoCredentialsFromEnv,
@@ -26,6 +27,7 @@ export const jsonToDSL = async (dsl: DangerDSLJSONType, source: CISource): Promi
   const api = apiForDSL(dsl)
   const platformExists = [dsl.github, dsl.bitbucket_server].some(p => !!p)
   const github = dsl.github && githubJSONToGitHubDSL(dsl.github, api as OctoKit)
+  const gitlab = dsl.gitlab
   const bitbucket_server = dsl.bitbucket_server
 
   let git: GitDSL
@@ -44,6 +46,7 @@ export const jsonToDSL = async (dsl: DangerDSLJSONType, source: CISource): Promi
     // otherwise everyone would need to have a check for GitHub/BBS in every Dangerfile
     // which just doesn't feel right.
     github: github!,
+    gitlab: gitlab!,
     bitbucket_server: bitbucket_server!,
     utils: {
       sentence,
@@ -52,9 +55,13 @@ export const jsonToDSL = async (dsl: DangerDSLJSONType, source: CISource): Promi
   }
 }
 
-const apiForDSL = (dsl: DangerDSLJSONType): OctoKit | BitBucketServerAPI => {
+const apiForDSL = (dsl: DangerDSLJSONType): OctoKit | BitBucketServerAPI | GitLabAPI => {
   if (process.env["DANGER_BITBUCKETSERVER_HOST"]) {
     return new BitBucketServerAPI(dsl.bitbucket_server!.metadata, bitbucketServerRepoCredentialsFromEnv(process.env))
+  }
+
+  if (process.env["DANGER_GITLAB_TOKEN"]) {
+    return new GitLabAPI(dsl.gitlab!.metadata, gitlabSettingsFromEnv(process.env))
   }
 
   const options: OctoKit.Options & { debug: boolean } = {
