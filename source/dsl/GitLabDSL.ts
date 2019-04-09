@@ -9,7 +9,20 @@ export interface GitLabDSL {
   mr: GitLabMR
   commits: GitLabMRCommit[]
   // comments: any[]
-  utils: {}
+  utils: GitLabUtilsDSL
+}
+
+/** Useful functions for GitHub related work */
+export interface GitLabUtilsDSL {
+  /**
+   * Downloads a file's contents via the GitHub API. You'll want to use
+   * this instead of `fs.readFile` when aiming to support working with Peril.
+   *
+   * @param {string} path The path fo the file that exists
+   * @param {string} repoSlug An optional reference to the repo's slug: e.g. danger/danger-js
+   * @param {string} ref An optional reference to a branch/sha
+   */
+  fileContents(path: string, repoSlug?: string, ref?: string): Promise<string>
 }
 
 // ---

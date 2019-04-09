@@ -55,6 +55,32 @@ class GitLabAPI {
     return `${this.projectURL}/merge_requests/${this.repoMetadata.pullRequestID}`
   }
 
+  /**
+   * Grabs the contents of an individual file on GitHub
+   *
+   * @param {string} path path to the file
+   * @param {string} [ref] an optional sha
+   * @returns {Promise<string>} text contents
+   *
+   */
+  fileContents = async (path: string, repoSlug?: string, ref?: string): Promise<string> => {
+    // Use the current state of MR if no repo/ref is passed
+    if (!repoSlug || !ref) {
+      const mrJSON = await this.getMergeRequestInfo()
+      repoSlug = this.repoMetadata.repoSlug
+      ref = mrJSON.diff_refs.head_sha
+    }
+
+    const data = await this.getFileContents(path, repoSlug, ref)
+    const buffer = new Buffer(data.content, "base64")
+    return buffer.toString()
+  }
+
+  getFileContents = async (path: string, repoSlug: string, ref: string): Promise<any> => {
+    const content = await this.api.RepositoryFiles.show(repoSlug, path, ref)
+    return { content: content }
+  }
+
   getUser = async (): Promise<GitLabUserProfile> => {
     // if (this.user) {
     //   return this.user

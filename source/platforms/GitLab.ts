@@ -1,11 +1,11 @@
 import GitLabAPI from "./gitlab/GitLabAPI"
-import { Platform, Comment } from "./platform"
-import { readFileSync } from "fs"
+import { Comment, Platform } from "./platform"
 import { GitDSL, GitJSONDSL } from "../dsl/GitDSL"
 import { GitCommit } from "../dsl/Commit"
 import { GitLabDSL, GitLabNote } from "../dsl/GitLabDSL"
 
 import { debug } from "../debug"
+
 const d = debug("GitLab")
 
 class GitLab implements Platform {
@@ -14,6 +14,8 @@ class GitLab implements Platform {
   constructor(public readonly api: GitLabAPI) {
     this.name = "GitLab"
   }
+
+  getFileContents = this.api.fileContents
 
   getReviewInfo = async (): Promise<any> => {
     return this.api.getMergeRequestInfo()
@@ -33,7 +35,9 @@ class GitLab implements Platform {
       mr,
       commits,
       // comments,
-      utils: {},
+      utils: {
+        fileContents: this.api.fileContents,
+      },
     }
   }
 
@@ -183,8 +187,6 @@ class GitLab implements Platform {
     d("updateStatus", {})
     return true
   }
-
-  getFileContents = (path: string) => new Promise<string>(res => res(readFileSync(path, "utf8")))
 }
 
 export default GitLab
